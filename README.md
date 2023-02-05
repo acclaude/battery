@@ -10,8 +10,6 @@ This is an app for M1 Macs. It will not work on non-M1 macs. Do you have an olde
 
 ### Installation
 
-- Option 1: install through brew with `brew install battery`
-- Option 2: [You can download the latest app dmg version here]( https://github.com/actuallymentor/battery/releases/ ).
 - Option 3: command-line only installation (see section below)
 
 The first time you open the app, it will ask for your administator password so it can install the needed components. Please note that the app:
@@ -23,32 +21,15 @@ The first time you open the app, it will ask for your administator password so i
 - Keeps the limit engaged even after closing the tray app
 - Also automatically installs the `battery` command line tool. If you want a custom charging percentage, the CLI is the only way to do that.
 
-Do you have questions, comments, or feature requests? [Open an issue here](https://github.com/actuallymentor/battery/issues) or [Tweet at me](https://twitter.com/actuallymentor).
-
 ---
 
 
 ## 🖥 Command-line version
 
-> If you don't know what a "command line" is, ignore this section. You don't need it.
-
-The GUI app uses a command line tool under the hood. Installing the GUI automatically installs the CLI as well. You can also separately install the CLI.
 
 The CLI is used for managing the battery charging status for M1 Macs. Can be used to enable/disable the Macbook from charging the battery when plugged into power.
 
-### Installation
-
-One-line installation:
-
-```bash
-curl -s https://raw.githubusercontent.com/actuallymentor/battery/main/setup.sh | bash
-```
-
-This will:
-
-1. Compile the `smc` tool from the [hholtmann/smcFanControl]( https://github.com/hholtmann/smcFanControl.git ) repository
-2. Install `smc` to `/usr/local/bin`
-3. Install `battery` to `/usr/local/bin`
+read setup.sh 
 
 ### Usage
 
@@ -112,15 +93,7 @@ Usage:
     enable charging, remove the smc tool, and the battery script
 ```
 
-## Why does this exist?
-
-I was looking at the Al Dente software package for battery limiting, but I found the [license too limiting](https://github.com/davidwernhart/AlDente/discussions/558) for a poweruser like myself.
-
-I would actually have preferred using Al Dente, but decided to create a command-line utility to replace it as a side-project on holiday. A colleague mentioned they would like a GUI, so I spend a few evenings setting up an Electron app. And voila, here we are.
-
 ## "It's not working"
-
-If you used one of the earlier versions of the `battery` utility, you may run into [path/permission issues](https://github.com/actuallymentor/battery/issues/8). This is not your fault but mine. To fix it:
 
 ```
 sudo rm -rf ~/.battery
@@ -128,4 +101,3 @@ binfolder=/usr/local/bin
 sudo rm -v "$binfolder/smc" "$binfolder/battery"
 ```
 
-Then reopen the app and things should work. If not, [open an issue](https://github.com/actuallymentor/battery/issues/new) and I'll try to help you fix it.
