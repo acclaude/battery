@@ -8,14 +8,6 @@ This tool makes it possible to keep a chronically plugged in M1 Macbook at `80%`
 
 This is an app for M1 Macs. It will not work on non-M1 macs. Do you have an older Mac? Consider the free version of the [Al Dente](https://apphousekitchen.com/) software package. It is a good alternative and has a premium version with many more features.
 
-### Installation
-
-- Option 3: command-line only installation 
-
-The first time you open the app, it will ask for your administator password so it can install the needed components. Please note that the app:
-
-A COMPLETER
-
 ---
 
 
@@ -30,9 +22,16 @@ read setup.sh
 
 Example usage:
 
+
+
+
 ```shell
-# This will enable charging when your battery dips under 80, and disable it when it exceeds 80
+# This will enable charging when your battery dips under 80-4 , force discharge if battery > 80 and disable charge  when between [80-4, 80]
 battery maintain 80
+
+
+
+
 ```
 
 For help, run `battery` without parameters:
