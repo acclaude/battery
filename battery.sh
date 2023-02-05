@@ -107,6 +107,16 @@ function log() {
 
 }
 
+#
+# no AC present
+function get_ac_online()
+	status=$( smc -k CHCE -r | awk '{print $6}' | sed s:\):: )
+        if [[ "$status" == "00" ]]; then
+                echo "offline"
+        else
+                echo "online"
+        fi
+
 # Re:discharging, we're using keys uncovered by @howie65: https://github.com/actuallymentor/battery/issues/20#issuecomment-1364540704
 # CH0I seems to be the "disable the adapter" key
 function enable_discharging() {
@@ -126,7 +136,6 @@ function enable_charging() {
 	log "🔌🔋 Enabling battery charging"
 	sudo smc -k CH0B -w 00
 	sudo smc -k CH0C -w 00
-	disable_discharging
 }
 
 function disable_charging() {
@@ -222,7 +231,7 @@ if [[ "$action" == "uninstall" ]]; then
 		echo "Press any key to continue"
 		read
 	fi
-    enable_charging
+   	enable_charging
 	disable_discharging
 	battery remove_daemon
     sudo rm -v "$binfolder/smc" "$binfolder/battery"
@@ -241,6 +250,7 @@ if [[ "$action" == "charging" ]]; then
 	# Set charging to on and off
 	if [[ "$setting" == "on" ]]; then
 		enable_charging
+		disable_discharging
 	elif [[ "$setting" == "off" ]]; then
 		disable_charging
 	fi
@@ -258,9 +268,9 @@ if [[ "$action" == "adapter" ]]; then
 	battery maintain stop
 
 	# Set charging to on and off
-	if [[ "$setting" == "on" ]]; then
+	if [[ "$setting" == "off" ]]; then
 		enable_discharging
-	elif [[ "$setting" == "off" ]]; then
+	elif [[ "$setting" == "on" ]]; then
 		disable_discharging
 	fi
 
@@ -339,32 +349,89 @@ if [[ "$action" == "maintain_synchronous" ]]; then
 		fi
 	fi
 
+
+	is_discharging=$( get_smc_discharging_status )
+	if [[  "$is_discharging" == "discharging" ]];then
+		disable_discharging
+	fi
+	is_charging=$( get_smc_charging_status )
+	if [[  "$is_charging" == "disabled" ]];then
+		enable_charging
+	fi
+
 	# Before we start maintaining the battery level, first discharge to the target level
-	log "Triggering discharge to $setting before enabling charging limiter"
-	battery discharge "$setting"
-	log "Discharge pre battery-maintenance complete, continuing to battery maintenance loop"
+	# log "Triggering discharge to $setting before enabling charging limiter"
+	# battery discharge "$setting"
+	# log "Discharge pre battery-maintenance complete, continuing to battery maintenance loop"
 
-	# Start charging
 	battery_percentage=$( get_battery_percentage )
-
 	log "Charging to and maintaining at $setting% from $battery_percentage%"
 
+	upper_limit=$setting
+ 	mid_limit=$(($setting-2))
+	lower_limit=$(($setting-4))
+
+	sail="off"
 	# Loop until battery percent is exceeded
 	while true; do
 
 		# Keep track of status
 		is_charging=$( get_smc_charging_status )
+		is_discharging=$( get_smc_discharging_status )
+		ac_on_line=$(get_ac_online)
 
-		if [[ "$battery_percentage" -ge "$setting" && "$is_charging" == "enabled" ]]; then
+		if [[ "$ac_on_line" == "offline"  ]];then
+ 
+			log "Mode battery auto:: Chargeur: $ac_on_line"
+			if [[  "$is_charging" == "disabled" ]];then
+				enable_charging
+			fi
 
-			log "Charge above $setting"
-			disable_charging
+			if [[  "$is_discharging" == "discharging" ]];then
+				disable_discharging
+			fi
 
-		elif [[ "$battery_percentage" -lt "$setting" && "$is_charging" == "disabled" ]]; then
+		else;
 
-			log "Charge below $setting"
-			enable_charging
+			if [[ "$battery_percentage" -ge "$upper_limit" ]]; then
 
+				log "Charge above upper limit $upper_limit discharge force"
+				if [[ "$is_discharging" == "not discharging" ]]; then
+					enable_discharging
+				fi
+
+			elif [["$battery_percentage" -ge "$mid_limit" && "$battery_percentage" -lt "$upper_limit" ]]; then
+
+				log "Battery charge = $battery_percentage > $mid_limit et < $upper_limit ==> inhibit charge"
+				if [[  "$is_discharging" == "discharging" ]];then
+					disable_discharging
+				fi
+				if [[  "$is_charging" == "disabled" ]];then
+					disable_charging
+				fi
+				sail="off"
+
+			elif [[ "$sail" == "off" && "$battery_percentage" -ge "$lower_limit" && "$battery_percentage" -lt "$mid_limit" ]]
+
+				log "Battery charge = $battery_percentage > $lower_limit_limit et < $mid_limit ==> inhibit charge"
+				if [[  "$is_discharging" == "discharging" ]];then
+					disable_discharging
+				fi
+				if [[  "$is_charging" == "disabled" ]];then
+					disable_charging
+				fi
+ 			else;
+
+				log "Battery charge:  $battery_percentage < $lower_limit ==> charge battery"
+				if [[  "$is_discharging" == "discharging" ]];then
+					disable_discharging
+				fi
+				if [[  "$is_charging" == "disabled" ]];then
+					enable_charging
+				fi
+				sail="on"
+
+			fi
 		fi
 
 		sleep 60
@@ -374,7 +441,6 @@ if [[ "$action" == "maintain_synchronous" ]]; then
 	done
 
 	exit 0
-
 fi
 
 # Asynchronous battery level maintenance
