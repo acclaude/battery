@@ -1,6 +1,6 @@
 # Battery charge limiter for M1 Mac devices
 
-<img align="right" src="./screenshots/tray.png"/>This tool makes it possible to keep a chronically plugged in M1 Macbook at `80%` battery, since that will prolong the longevity of the battery. It is free and open-source and will remain that way.
+This tool makes it possible to keep a chronically plugged in M1 Macbook at `80%` battery, since that will prolong the longevity of the battery. It is free and open-source and will remain that way.
 
 > Want to know if this tool does anything or is just a placebo? Read [this excellent article](https://batteryuniversity.com/article/bu-808-how-to-prolong-lithium-based-batteries). TL;DR: keep your battery cool, keep it at 80% when plugged in, and discharge it as shallowly as feasible.
 
@@ -10,16 +10,11 @@ This is an app for M1 Macs. It will not work on non-M1 macs. Do you have an olde
 
 ### Installation
 
-- Option 3: command-line only installation (see section below)
+- Option 3: command-line only installation 
 
 The first time you open the app, it will ask for your administator password so it can install the needed components. Please note that the app:
 
-- Discharges your battery until it reaches 80%, **even when plugged in**
-- Disables charging when your battery is above 80% charged
-- Enabled charging when your battery is under 80% charged
-- Keeps the limit engaged even after rebooting
-- Keeps the limit engaged even after closing the tray app
-- Also automatically installs the `battery` command line tool. If you want a custom charging percentage, the CLI is the only way to do that.
+A COMPLETER
 
 ---
 
@@ -39,15 +34,6 @@ Example usage:
 # This will enable charging when your battery dips under 80, and disable it when it exceeds 80
 battery maintain 80
 ```
-
-After running a command like `battery charging off` you can verify the change visually by looking at the battery icon:
-
-![Battery not charging](./screenshots/not-charging-screenshot.png)
-
-After running `battery charging on` you will see it change to this:
-
-![Battery charging](./screenshots/charging-screenshot.png)
-
 
 For help, run `battery` without parameters:
 
