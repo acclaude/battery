@@ -68,12 +68,6 @@ Usage:
   battery visudo
     instructions on how to make which utility exempt from sudo, highly recommended
 
-  battery update
-    update the battery utility to the latest version
-
-  battery reinstall
-    reinstall the battery utility to the latest version (reruns the installation script)
-
   battery uninstall
     enable charging, remove the smc tool, and the battery script
 
@@ -202,7 +196,7 @@ if [[ "$action" == "visudo" ]]; then
 fi
 
 # Reinstall helper
-if [[ "$action" == "reinstall" ]]; then
+if [[ "$action" == "--reinstall--" ]]; then
 	echo "This will run curl -sS https://raw.githubusercontent.com/actuallymentor/battery/main/setup.sh | bash"
 	if [[ ! "$setting" == "silent" ]]; then
 		echo "Press any key to continue"
@@ -213,7 +207,7 @@ if [[ "$action" == "reinstall" ]]; then
 fi
 
 # Update helper
-if [[ "$action" == "update" ]]; then
+if [[ "$action" == "--update--" ]]; then
 	echo "This will run curl -sS https://raw.githubusercontent.com/actuallymentor/battery/main/update.sh | bash"
 	if [[ ! "$setting" == "silent" ]]; then
 		echo "Press any key to continue"

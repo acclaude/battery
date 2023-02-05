@@ -69,14 +69,6 @@ Usage:
   battery visudo
     instructions on how to make which utility exempt from sudo, highly recommended
 
-  battery update
-    update the battery utility to the latest version
-
-  battery reinstall
-    reinstall the battery utility to the latest version (reruns the installation script)
-
-  battery uninstall
-    enable charging, remove the smc tool, and the battery script
 ```
 
 ## "It's not working"
