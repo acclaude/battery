@@ -22,9 +22,7 @@ read setup.sh
 
 Example usage:
 
-
-
-# This will enable charging when your battery dips under 80-4, force discharge if battery > 80 and disable charge  when between [80-4, 80]
+This will enable charging when your battery dips under 80-4, force discharge if battery > 80 and disable charge  when between [80-4, 80]
 
 ```shell
 battery maintain 80
