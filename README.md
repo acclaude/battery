@@ -24,14 +24,10 @@ Example usage:
 
 
 
+# This will enable charging when your battery dips under 80-4, force discharge if battery > 80 and disable charge  when between [80-4, 80]
 
 ```shell
-# This will enable charging when your battery dips under 80-4 , force discharge if battery > 80 and disable charge  when between [80-4, 80]
 battery maintain 80
-
-
-
-
 ```
 
 For help, run `battery` without parameters:
