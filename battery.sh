@@ -250,7 +250,6 @@ if [[ "$action" == "charging" ]]; then
 	# Set charging to on and off
 	if [[ "$setting" == "on" ]]; then
 		enable_charging
-		disable_discharging
 	elif [[ "$setting" == "off" ]]; then
 		disable_charging
 	fi
