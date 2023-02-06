@@ -80,7 +80,7 @@ visudoconfig="
 Cmnd_Alias      BATTERYOFF = $binfolder/smc -k CH0B -w 02, $binfolder/smc -k CH0C -w 02, $binfolder/smc -k CH0B -r, $binfolder/smc -k CH0C -r
 Cmnd_Alias      BATTERYON = $binfolder/smc -k CH0B -w 00, $binfolder/smc -k CH0C -w 00
 Cmnd_Alias      DISCHARGEOFF = $binfolder/smc -k CH0I -w 00, $binfolder/smc -k CH0I -r
-Cmnd_Alias      DISCHARGEON = $binfolder/smc -k CH0I -w 01
+Cmnd_Alias      DISCHARGEON = $binfolder/smc -k CH0I -w 01, $binfolder/smc -k CHCR -r
 ALL ALL = NOPASSWD: BATTERYOFF
 ALL ALL = NOPASSWD: BATTERYON
 ALL ALL = NOPASSWD: DISCHARGEOFF
@@ -103,14 +103,14 @@ function log() {
 
 #
 # no AC present
-function get_ac_online()
+function get_ac_online(){
 	status=$( smc -k CHCE -r | awk '{print $6}' | sed s:\):: )
         if [[ "$status" == "00" ]]; then
                 echo "offline"
         else
                 echo "online"
         fi
-
+}
 # Re:discharging, we're using keys uncovered by @howie65: https://github.com/actuallymentor/battery/issues/20#issuecomment-1364540704
 # CH0I seems to be the "disable the adapter" key
 function enable_discharging() {
@@ -384,7 +384,7 @@ if [[ "$action" == "maintain_synchronous" ]]; then
 				disable_discharging
 			fi
 
-		else;
+		else
 
 			if [[ "$battery_percentage" -ge "$upper_limit" ]]; then
 
@@ -393,7 +393,7 @@ if [[ "$action" == "maintain_synchronous" ]]; then
 					enable_discharging
 				fi
 
-			elif [["$battery_percentage" -ge "$mid_limit" && "$battery_percentage" -lt "$upper_limit" ]]; then
+			elif [[ "$battery_percentage" -ge "$mid_limit" && "$battery_percentage" -lt "$upper_limit" ]]; then
 
 				log "Battery charge = $battery_percentage > $mid_limit et < $upper_limit ==> inhibit charge"
 				if [[  "$is_discharging" == "discharging" ]];then
@@ -404,7 +404,7 @@ if [[ "$action" == "maintain_synchronous" ]]; then
 				fi
 				sail="off"
 
-			elif [[ "$sail" == "off" && "$battery_percentage" -ge "$lower_limit" && "$battery_percentage" -lt "$mid_limit" ]]
+			elif [[ "$sail" == "off" && "$battery_percentage" -ge "$lower_limit" && "$battery_percentage" -lt "$mid_limit" ]];then
 
 				log "Battery charge = $battery_percentage > $lower_limit_limit et < $mid_limit ==> inhibit charge"
 				if [[  "$is_discharging" == "discharging" ]];then
@@ -413,7 +413,7 @@ if [[ "$action" == "maintain_synchronous" ]]; then
 				if [[  "$is_charging" == "disabled" ]];then
 					disable_charging
 				fi
- 			else;
+ 			else
 
 				log "Battery charge:  $battery_percentage < $lower_limit ==> charge battery"
 				if [[  "$is_discharging" == "discharging" ]];then
