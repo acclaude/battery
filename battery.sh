@@ -325,7 +325,10 @@ fi
 
 # Maintain at level
 if [[ "$action" == "maintain_synchronous" ]]; then
-	
+
+	# temperature limite pour la baterie 31.00 <==> 310
+	TMP_LIMIT=310
+
 	# Recover old maintain status if old setting is found
 	if [[ "$setting" == "recover" ]]; then
 
@@ -373,6 +376,8 @@ if [[ "$action" == "maintain_synchronous" ]]; then
 		is_discharging=$( get_smc_discharging_status )
 		ac_on_line=$(get_ac_online)
 
+		itemp=$(( $(ioreg -r -n AppleSmartBattery | grep '"Temperature"' | awk '{print $3}') - 2731))
+
 		if [[ "$ac_on_line" == "offline"  ]];then
  
 			log "Mode battery auto:: Chargeur: $ac_on_line"
@@ -396,17 +401,31 @@ if [[ "$action" == "maintain_synchronous" ]]; then
 			elif [[ "$battery_percentage" -ge "$mid_limit" && "$battery_percentage" -lt "$upper_limit" ]]; then
 
 				log "Battery charge = $battery_percentage > $mid_limit et < $upper_limit ==> inhibit charge"
-				if [[  "$is_discharging" == "discharging" ]];then
-					disable_discharging
-				fi
-				if [[  "$is_charging" == "disabled" ]];then
-					disable_charging
-				fi
+
+				if [[ "$TEMP_LIMIT" -le "$itemp" ]]; then
+					if [[  "$is_discharging" == "not discharging" ]];then
+						enable_discharging
+					fi
+				else
+		    		## pas de decharge forcée
+
+					if [[  "$is_discharging" == "discharging" ]];then
+						disable_discharging
+					fi
+
+					# inhibit charging
+
+					if [[  "$is_charging" == "enabled" ]];then
+						disable_charging
+					fi
+				fi	
 				sail="off"
+
 
 			elif [[ "$sail" == "off" && "$battery_percentage" -ge "$lower_limit" && "$battery_percentage" -lt "$mid_limit" ]];then
 
 				log "Battery charge = $battery_percentage > $lower_limit_limit et < $mid_limit ==> inhibit charge"
+
 				if [[  "$is_discharging" == "discharging" ]];then
 					disable_discharging
 				fi
@@ -415,14 +434,27 @@ if [[ "$action" == "maintain_synchronous" ]]; then
 				fi
  			else
 
-				log "Battery charge:  $battery_percentage < $lower_limit ==> charge battery"
-				if [[  "$is_discharging" == "discharging" ]];then
-					disable_discharging
-				fi
-				if [[  "$is_charging" == "disabled" ]];then
-					enable_charging
-				fi
-				sail="on"
+				if [[ "$TEMP_LIMIT" -le  "$itemp" ]]; then
+				 
+					log "Battery charge:  $battery_percentage < $lower_limit,"$TEMP_LIMIT" -ge  "$itemp" ==> inhibit charge"
+					if [[  "$is_discharging" == "discharging" ]];then
+						disable_discharging
+					fi
+					if [[  "$is_charging" == "enabled" ]];then
+						disable_charging
+					fi
+				 	## otherwise auto (charge) and start (keep) sailing
+				else
+					if [[  "$is_discharging" == "discharging" ]];then
+						disable_discharging
+					fi
+					if [[  "$is_charging" == "disabled" ]];then
+						enable_charging
+					fi
+		    		if [[ "$sail"=="off" ]]; then
+		    			sail="on"
+					fi
+					log "Battery charge:  $battery_percentage < $lower_limit ==> charge battery"
 
 			fi
 		fi
