@@ -326,7 +326,6 @@ fi
 # Maintain at level
 if [[ "$action" == "maintain_synchronous" ]]; then
 
-	# temperature limite pour la baterie 31.00 <==> 310
 	TMP_LIMIT=310
 
 	# Recover old maintain status if old setting is found
@@ -393,14 +392,14 @@ if [[ "$action" == "maintain_synchronous" ]]; then
 
 			if [[ "$battery_percentage" -ge "$upper_limit" ]]; then
 
-				log "Charge above upper limit $upper_limit discharge force"
+				log "Charge above upper limit $upper_limit discharge force, battery temp $itemp /10 degC"
 				if [[ "$is_discharging" == "not discharging" ]]; then
 					enable_discharging
 				fi
 
 			elif [[ "$battery_percentage" -ge "$mid_limit" && "$battery_percentage" -lt "$upper_limit" ]]; then
 
-				log "Battery charge = $battery_percentage > $mid_limit et < $upper_limit ==> inhibit charge"
+				log "Battery charge = $battery_percentage > $mid_limit et < $upper_limit ==> inhibit charge, temp bat $itemp /10 degC"
 
 				if [[ "$TEMP_LIMIT" -le "$itemp" ]]; then
 					if [[  "$is_discharging" == "not discharging" ]];then
@@ -452,9 +451,10 @@ if [[ "$action" == "maintain_synchronous" ]]; then
 						enable_charging
 					fi
 		    		if [[ "$sail"=="off" ]]; then
-		    			sail="on"
+		    				sail="on"
 					fi
 					log "Battery charge:  $battery_percentage < $lower_limit ==> charge battery"
+				fi
 
 			fi
 		fi
