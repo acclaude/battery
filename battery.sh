@@ -326,7 +326,7 @@ fi
 # Maintain at level
 if [[ "$action" == "maintain_synchronous" ]]; then
 
-	TMP_LIMIT=310
+	TEMP_LIMIT=310
 
 	# Recover old maintain status if old setting is found
 	if [[ "$setting" == "recover" ]]; then
@@ -377,29 +377,26 @@ if [[ "$action" == "maintain_synchronous" ]]; then
 
 		itemp=$(( $(ioreg -r -n AppleSmartBattery | grep '"Temperature"' | awk '{print $3}') - 2731))
 
-		if [[ "$ac_on_line" == "offline"  ]];then
+		if [[ "$ac_on_line" == "offline" &&  "$is_discharging" == "not discharging"  ]];then
  
 			log "Mode battery auto:: Chargeur: $ac_on_line"
 			if [[  "$is_charging" == "disabled" ]];then
 				enable_charging
 			fi
 
-			if [[  "$is_discharging" == "discharging" ]];then
-				disable_discharging
-			fi
-
 		else
 
 			if [[ "$battery_percentage" -ge "$upper_limit" ]]; then
-
-				log "Charge above upper limit $upper_limit discharge force, battery temp $itemp /10 degC"
+				log "Charge above upper limit $upper_limit discharge force, battery temp $itemp/10 degC"
 				if [[ "$is_discharging" == "not discharging" ]]; then
 					enable_discharging
 				fi
+				tt=$( get_smc_discharging_status )
+				log "etat discharging $tt"
 
 			elif [[ "$battery_percentage" -ge "$mid_limit" && "$battery_percentage" -lt "$upper_limit" ]]; then
 
-				log "Battery charge = $battery_percentage > $mid_limit et < $upper_limit ==> inhibit charge, temp bat $itemp /10 degC"
+				log "Battery charge = $battery_percentage > $mid_limit et < $upper_limit ==> inhibit charge, temp bat $itemp/10 degC"
 
 				if [[ "$TEMP_LIMIT" -le "$itemp" ]]; then
 					if [[  "$is_discharging" == "not discharging" ]];then
@@ -419,6 +416,10 @@ if [[ "$action" == "maintain_synchronous" ]]; then
 					fi
 				fi	
 				sail="off"
+				tt=$( get_smc_discharging_status )
+				log "etat discharging $tt"
+				tt=$( get_smc_charging_status )
+				log "etat ischarging $tt"
 
 
 			elif [[ "$sail" == "off" && "$battery_percentage" -ge "$lower_limit" && "$battery_percentage" -lt "$mid_limit" ]];then
@@ -431,6 +432,10 @@ if [[ "$action" == "maintain_synchronous" ]]; then
 				if [[  "$is_charging" == "disabled" ]];then
 					disable_charging
 				fi
+				tt=$( get_smc_discharging_status )
+				log "etat discharging $tt"
+				tt=$( get_smc_charging_status )
+				log "etat ischarging $tt"
  			else
 
 				if [[ "$TEMP_LIMIT" -le  "$itemp" ]]; then
@@ -455,6 +460,10 @@ if [[ "$action" == "maintain_synchronous" ]]; then
 					fi
 					log "Battery charge:  $battery_percentage < $lower_limit ==> charge battery"
 				fi
+				tt=$( get_smc_discharging_status )
+				log "etat discharging $tt"
+				tt=$( get_smc_charging_status )
+				log "etat ischarging $tt"
 
 			fi
 		fi
